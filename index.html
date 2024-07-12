@@ -13,8 +13,8 @@
             position: fixed;
             top: 10%;
             left: 10%;
-            width: 950%;
-            height: 95%;
+            width: 80%;
+            height: 80%;
             border: 2px solid black;
             background-color: white;
             z-index: 1000;
@@ -30,10 +30,19 @@
             flex: 1 1 50%;
             border: 1px solid black;
         }
-        .close-btn {
+        .control-panel {
             position: absolute;
             top: 10px;
             right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .countdown {
+            padding: 10px;
+            background-color: lightgray;
+            margin-right: 10px;
+        }
+        .close-btn {
             padding: 10px;
             background-color: red;
             color: white;
@@ -47,20 +56,30 @@
         <div class="iframe-container">
             <iframe src="https://www.wikipedia.org" title="site 1"></iframe>
             <iframe src="https://www.w3schools.com" title="site 2"></iframe>
-            <iframe src="https://www.wikipedia.org" title="site 3"></iframe>
-            <iframe src="https://www.wikipedia.org" title="site 4"></iframe>
+            <iframe src="https://www.openstreetmap.org" title="site 3"></iframe>
+            <iframe src="https://example.com" title="site 4"></iframe>
         </div>
-        <div class="close-btn" id="closeBtn">X</div>
+        <div class="control-panel">
+            <div class="countdown" id="countdown">15</div>
+            <div class="close-btn" id="closeBtn">X</div>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const popupPanel = document.getElementById('popupPanel');
             const closeBtn = document.getElementById('closeBtn');
+            const countdownElement = document.getElementById('countdown');
+            let countdown = 15;
 
-            setTimeout(() => {
-                closeBtn.style.display = 'block';
-            }, 15000);
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+                if (countdown === 0) {
+                    clearInterval(countdownInterval);
+                    closeBtn.style.display = 'block';
+                }
+            }, 1000);
 
             closeBtn.addEventListener('click', function () {
                 popupPanel.style.display = 'none';
