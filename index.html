@@ -81,38 +81,50 @@
             const adContent = document.getElementById('adContent');
             let countdown = 15;
 
-            // Fetch ad.txt content
-            fetch('StreamingAssets/ad.txt')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    adContent.textContent = data;
-                })
-                .catch(error => {
-                    console.error('Error fetching ad.txt:', error);
-                    adContent.textContent = 'Error loading ad content';
-                });
-
-            const countdownInterval = setInterval(() => {
-                countdown--;
+            function showPopup() {
+                popupPanel.style.display = 'block';
+                closeBtn.style.display = 'none';
+                countdown = 15;
                 countdownElement.textContent = countdown;
-                if (countdown === 0) {
-                    clearInterval(countdownInterval);
-                    closeBtn.style.display = 'block';
-                    countdownElement.textContent = "";
-                }
-            }, 1000);
+
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+                    if (countdown === 0) {
+                        clearInterval(countdownInterval);
+                        closeBtn.style.display = 'block';
+                        countdownElement.textContent = "";
+                    }
+                }, 1000);
+            }
+
+            function checkAdTxtAndShowPopup() {
+                fetch('StreamingAssets/ad.txt')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        adContent.textContent = data;
+                        if (data.trim() === '1') {
+                            showPopup();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching ad.txt:', error);
+                        adContent.textContent = 'Error loading ad content';
+                    });
+            }
 
             closeBtn.addEventListener('click', function () {
                 popupPanel.style.display = 'none';
+                checkAdTxtAndShowPopup();
             });
 
-            // Show the popup panel
-            popupPanel.style.display = 'block';
+            // Initial popup display
+            showPopup();
         });
     </script>
 </body>
