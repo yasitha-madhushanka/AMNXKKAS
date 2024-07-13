@@ -1,131 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Popup Panel</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .popup-panel {
-            display: none;
-            position: fixed;
-            top: 10%;
-            left: 10%;
-            width: 80%;
-            height: 80%;
-            border: 2px solid black;
-            background-color: white;
-            z-index: 1000;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-        .iframe-container {
-            display: flex;
-            flex-wrap: wrap;
-            width: 100%;
-            height: 80%;
-        }
-        .iframe-container iframe {
-            flex: 1 1 50%;
-            border: 1px solid black;
-        }
-        .control-panel {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            align-items: center;
-        }
-        .countdown {
-            padding: 10px;
-            margin-right: 10px;
-        }
-        .close-btn {
-            padding: 10px;
-            background-color: red;
-            color: white;
-            cursor: pointer;
-            display: none;
-        }
-        .ad-content {
-            padding: 10px;
-            background-color: lightgray;
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            width: calc(100% - 20px);
-        }
-    </style>
-</head>
-<body>
-    <div class="popup-panel" id="popupPanel">
-        <div class="iframe-container">
-            <iframe src="https://www.wikipedia.org" title="site 1"></iframe>
-            <iframe src="https://www.w3schools.com" title="site 2"></iframe>
-            <iframe src="https://www.openstreetmap.org" title="site 3"></iframe>
-            <iframe src="https://example.com" title="site 4"></iframe>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity Web Player | Slither kozow</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <link rel="manifest" href="manifest.webmanifest">
+  </head>
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
         </div>
-        <div class="control-panel">
-            <div class="countdown" id="countdown">15</div>
-            <div class="close-btn" id="closeBtn">X</div>
-        </div>
-        <div class="ad-content" id="adContent"></div>
+      </div>
+      <div id="unity-warning"> </div>
     </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const popupPanel = document.getElementById('popupPanel');
-            const closeBtn = document.getElementById('closeBtn');
-            const countdownElement = document.getElementById('countdown');
-            const adContent = document.getElementById('adContent');
-            let countdown = 15;
+      window.addEventListener("load", function () {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.register("ServiceWorker.js");
+        }
+      });
 
-            function showPopup() {
-                popupPanel.style.display = 'block';
-                closeBtn.style.display = 'none';
-                countdown = 15;
-                countdownElement.textContent = countdown;
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var warningBanner = document.querySelector("#unity-warning");
 
-                const countdownInterval = setInterval(() => {
-                    countdown--;
-                    countdownElement.textContent = countdown;
-                    if (countdown === 0) {
-                        clearInterval(countdownInterval);
-                        closeBtn.style.display = 'block';
-                        countdownElement.textContent = "";
-                    }
-                }, 1000);
-            }
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
 
-            function checkAdTxtAndShowPopup() {
-                fetch('StreamingAssets/ad.txt')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status}`);
-                        }
-                        return response.text();
-                    })
-                    .then(data => {
-                        adContent.textContent = data;
-                        if (data.trim() === '1') {
-                            showPopup();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching ad.txt:', error);
-                        adContent.textContent = 'Error loading ad content';
-                    });
-            }
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/WEBVIEWLAST.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/WEBVIEWLAST.data.br",
+        frameworkUrl: buildUrl + "/WEBVIEWLAST.framework.js.br",
+        codeUrl: buildUrl + "/WEBVIEWLAST.wasm.br",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "cyber art",
+        productName: "Slither kozow",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+      };
 
-            closeBtn.addEventListener('click', function () {
-                popupPanel.style.display = 'none';
-                checkAdTxtAndShowPopup();
-            });
+      // By default Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
 
-            // Initial popup display
-           checkAdTxtAndShowPopup();
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+      }
+
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+        }).then((unityInstance) => {
+          loadingBar.style.display = "none";
+        }).catch((message) => {
+          alert(message);
         });
+      };
+      document.body.appendChild(script);
     </script>
-</body>
+  </body>
 </html>
